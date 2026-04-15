@@ -18,7 +18,7 @@
     "Redis",
     "Login"
   ],
-  "author": "Cody Van De Mark / Austin Willoughby",
+  "author": "Dessa Shapiro",
   "license": "Apache 2.0",
   "dependencies": {
     "bcrypt": "^6.0.0",

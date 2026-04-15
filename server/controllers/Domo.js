@@ -1,3 +1,6 @@
+// This is be changed to dance posts and a most of the creation logic will change and be expanded.
+//Will add new permissions for the delet and add as well as file type and size checks for the video uploads.
+
 const models = require('../models');
 
 const Domo = models.Domo;

@@ -1,3 +1,5 @@
+// Will be completely scrapped and redone to fit the new theme of the app, but will keep some of the basic structure and functionality.
+
 const helper = require('./helper.js');
 const React = require('react');
 const { useState, useEffect, useRef } = React;

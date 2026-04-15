@@ -1,3 +1,5 @@
+// Change this to not be a Domo anymore but instead a Post or something like that where you can post your dance video. 
+
 const mongoose = require('mongoose');
 const _ = require('underscore');
 

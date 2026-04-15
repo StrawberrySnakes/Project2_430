@@ -1,3 +1,6 @@
+// Keep the login functionality and the signup functionality.
+//  Will change the style and layout of the page but will keep the basic structure of the login and signup forms. 
+// Will also keep the error handling for the forms. Will also keep the helper functions for sending post requests and handling errors.
 const helper = require('./helper.js');
 const React = require('react');
 const {createRoot} = require('react-dom/client');

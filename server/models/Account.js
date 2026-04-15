@@ -1,5 +1,6 @@
-/* This file defines our schema and model interface for the account data.
+// Will keep this file to mannage the login and account creation of users. We will use this to store the username and password of users and then use that to authenticate them when they log in. We will also use this to store the date that the account was created.
 
+/*
    We first import bcrypt and mongoose into the file. bcrypt is an industry
    standard tool for encrypting passwords. Mongoose is our tool for
    interacting with our mongo database.

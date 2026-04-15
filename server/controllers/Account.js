@@ -1,10 +1,10 @@
+// Keep basic login functionallity 
 const models = require('../models');
 const Account = models.Account;
 
 const loginPage = (req, res) => {
   return res.render('login');
 };
-
  
 const logout = (req, res) => {
     req.session.destroy();
