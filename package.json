@@ -1,0 +1,51 @@
+{
+  "name": "domomaker",
+  "version": "1.0.0",
+  "description": "A Simple Login Example using Node.js, Mongo and Redis",
+  "main": "./server/app.js",
+  "scripts": {
+    "webpack": "webpack",
+    "webpackWatch": "webpack watch",
+    "nodemon": "nodemon -e js,html,css --watch ./server --watch ./hosted ./server/app.js",
+    "start": "node ./server/app.js",
+    "pretest": "eslint ./server --fix",
+    "test": "echo \"Tests complete\"",
+    "heroku-postbuild": "webpack"
+  },
+  "keywords": [
+    "Node",
+    "MVC",
+    "Redis",
+    "Login"
+  ],
+  "author": "Cody Van De Mark / Austin Willoughby",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "compression": "^1.8.1",
+    "connect-redis": "^9.0.0",
+    "dotenv": "^17.4.1",
+    "express": "^5.1.0",
+    "express-handlebars": "^8.0.1",
+    "express-session": "^1.18.2",
+    "helmet": "^8.1.0",
+    "mongodb": "^6.21.0",
+    "mongoose": "^8.19.3",
+    "redis": "^5.9.0",
+    "serve-favicon": "^2.5.1",
+    "underscore": "^1.13.7"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-react": "^7.28.5",
+    "@eslint/js": "^10.0.1",
+    "babel-loader": "^10.1.1",
+    "eslint": "^10.0.0",
+    "globals": "^17.3.0",
+    "nodemon": "^3.1.10",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1"
+  }
+}

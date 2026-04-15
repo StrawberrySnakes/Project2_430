@@ -1,0 +1,377 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #f4f7f6;
+}
+
+#logo {
+    height: 40px;
+    width: 40px;
+    padding-top: 5px;
+    float: left;
+    border-radius: 8px;
+}
+
+nav {
+    width: 100%;
+    height: 50px;
+    background-color: #55acee;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+nav:nth-child(1) {
+    padding-left: 25px;
+}
+
+.navlink {
+    padding: 5px;
+    padding-top: 12px;
+    padding-left: 20px;
+    color: white;
+    font-size: 1.1em;
+    font-weight: bold;
+    float: left;
+}
+
+.navlink a, .navlink a:link, .navlink a:visited, .navlink a:hover, .navlink a:active {
+    color: white;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    background-color: transparent;
+    transition: background-color 0.3s ease;
+}
+
+.navlink a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.domoForm {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px 30px;
+    width: 80%;
+    max-width: 800px;
+    margin: 30px auto;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-top: 5px solid #55acee;
+}
+
+.domoForm label {
+    font-size: 1em;
+    font-weight: bold;
+    color: #444;
+    margin-right: -5px;
+}
+
+.domoForm input[type=text], .domoForm input[type=number], .domoSelect {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+    outline: none;
+}
+
+.domoForm input[type=text]:focus, .domoForm input[type=number]:focus, .domoSelect:focus {
+    border-color: #55acee;
+}
+
+.makeDomoSubmit {
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    padding: 10px 20px;
+    background-color: #55acee;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.makeDomoSubmit:hover {
+    background-color: #338acc;
+}
+
+.makeDomoSubmit:active {
+    transform: scale(0.97);
+}
+
+.mainForm {
+    height: 300px;
+    width: 350px;
+    margin: 0 auto;
+    padding-top: 150px;
+    font-size: 1.2em;
+}
+
+.mainForm h3 {
+    text-align: center;
+    color: #333;
+}
+
+.mainForm label {
+    display: inline-block;
+    width: 100px;
+    margin-right: 10px;
+    text-align: right;
+    font-size: 1.1em;
+}
+
+.formSubmit {
+    transition: background-color 0.3s ease;
+    display: block;
+    text-align: center;
+    margin: 20px auto 0;
+    font-size: 1.1em;
+    width: 120px;
+    background-color: #55acee;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 0px;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.formSubmit:hover {
+    background-color: #338acc;
+}
+
+#user, #pass, #pass2 {
+    text-align: center;
+    font-size: 1em;
+    width: 180px;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#user:focus, #pass:focus, #pass2:focus {
+    outline: none;
+    border-color: #55acee;
+}
+
+.hidden {
+    display: none;
+}
+
+#domoMessage {
+    top: 250px;
+    width: 250px;
+    height: 650px;
+    position: absolute;
+    z-index: 200;
+    right: 0px;
+    overflow: hidden;
+}
+
+#domoMessage h3 {
+    width: 200px;
+    position: absolute;
+    top: 0px;
+    left: 20px;
+}
+
+#speech {
+    height: 120px;
+    width: 250px;
+    z-index:300;
+}
+
+#errorMessage {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+#domo {
+    z-index: 225;
+    margin-top: -20px;
+    margin-left: 135px;
+    height: 450px;
+    width: 300px;
+    -ms-transform: rotate(330deg);
+    -webkit-transform: rotate(330deg); 
+    transform: rotate(330deg);
+}
+
+.domoList {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.domo {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    width: 320px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+    position: relative;
+    border-top: 6px solid #ccc;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.domo:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+}
+
+img.domoFace {
+    height: 64px;
+    width: 64px;
+    border-radius: 50%;
+    float: left;
+    margin-right: 15px;
+    object-fit: cover;
+}
+
+h3.emptyDomo {
+    width: 100%;
+    font-size: 1.5em;
+    color: #7f8c8d;
+    text-align: center;
+    margin-top: 50px;
+}
+
+h3.domoName {
+    margin: 0;
+    font-size: 1.4em;
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+h3.domoAge {
+    margin: 4px 0 12px 0;
+    font-size: 1em;
+    color: #7f8c8d;
+    font-weight: normal;
+}
+
+/* Added Styles */
+.domoColorRow {
+    clear: both;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 15px 0 10px 0;
+}
+
+.domoColorSwatch {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+}
+
+.domoColorLabel {
+    color: #34495e;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.domoMoodRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.domoMoodBadge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    color: white;
+    font-size: 0.85em;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.domoTimeHint {
+    color: #95a5a6;
+    font-size: 0.8em;
+}
+
+.domoEnergyBarContainer {
+    width: 100%;
+    height: 6px;
+    background-color: #ecf0f1;
+    border-radius: 3px;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+
+.domoEnergyBar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease-in-out, background-color 1s ease-in-out;
+}
+
+@keyframes neglectedPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+  70%  { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+}
+
+.domoNeglected {
+    animation: neglectedPulse 2s infinite;
+    border-top-color: #e74c3c !important;
+}
+
+.domoActions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.domoPet {
+    flex: 1;
+    margin-right: 8px;
+    padding: 8px 0;
+    background-color: #27ae60;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.domoPet:hover {
+    background-color: #219653;
+}
+
+.domoPet:active {
+    transform: scale(0.95);
+}
+
+.domoDelete {
+    padding: 8px 12px;
+    background-color: #e74c3c;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.domoDelete:hover {
+    background-color: #c0392b;
+}
