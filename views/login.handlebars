@@ -1,28 +1,29 @@
 {{!-- login.handlebars --}}
-{{!-- Keep Login Page But Changing Name and UI --}}
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>LRDCArchive</title>
+  <title>LRDC Archive — Sign In</title>
   <link rel="shortcut icon" href="/assets/img/favicon.png"/>
   <link rel="stylesheet" type="text/css" href="/assets/style.css"/>
 </head>
-<body> 
-  <nav><a href="/login"><img id="logo" src="/assets/img/face.png" alt="face logo"/></a>
-    <div class="navlink"><a id="loginButton" href="/login">Login</a></div>
-    <div class="navlink"><a id="signupButton" href="/signup">Sign up</a></div>
+<body>
+  <nav class="authNav">
+    <div class="navBrand">LRDC Archive</div>
+    <div class="navLinks">
+      <a id="loginButton" href="/login">Login</a>
+      <a id="signupButton" href="/signup">Sign Up</a>
+    </div>
   </nav>
-  
-  <section id="content">
 
-  </section>
+  <main class="authMain">
+    <section id="content"></section>
+  </main>
 
-{{!-- Either Change or git rid of this message and add a different custom one --}}
-  <div id="domoMessage" class='hidden'>
-    <img id="speech" src="/assets/img/speech.png" alt="speech box"/>
-    <h3><span id="errorMessage"></span></h3>
-    <img id="domo" src="assets/img/domo.png" alt="domo"/>
+  {{!-- Notification bar for form errors --}}
+  <div id="notification" class="hidden">
+    <span id="errorMessage"></span>
   </div>
+
   <script src="/assets/loginBundle.js"></script>
 </body>
 </html>
