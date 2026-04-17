@@ -1,3 +1,4 @@
+// Account.js - This is the model for our Account documents
 // Will keep this file to mannage the login and account creation of users. We will use this to store the username and password of users and then use that to authenticate them when they log in. We will also use this to store the date that the account was created.
 
 /*

@@ -1,4 +1,5 @@
-// Keep basic login functionallity 
+// Account.js controller - This is the controller for our Account documents
+// Keep basic login functionality 
 const models = require('../models');
 const Account = models.Account;
 

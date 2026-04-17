@@ -1,3 +1,4 @@
+// index.js middleware
 // Keep this page that deal with login, possible add more functionality if necessary. 
 
 // This is where we will check if the user is logged in or not and redirect them to the appropriate page. 

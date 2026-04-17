@@ -1,8 +1,9 @@
+// helper.jsx client
 // Redo to better fit my app 
 const handleError = (message) => {
     document.getElementById('errorMessage').textContent = message;
     document.getElementById('domoMessage').classList.remove('hidden');
-  };
+  }; 
   
   /* Sends post requests to the server using fetch. Will look for various
      entries in the response JSON object, and will handle them appropriately.
