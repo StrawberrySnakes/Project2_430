@@ -35,6 +35,11 @@ const AccountSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  // Premium toggle. No payment info stored.
+  isPremium: {
+    type: Boolean,
+    default: false,
+  },
   createdDate: {
     type: Date,
     default: Date.now,
@@ -45,6 +50,7 @@ const AccountSchema = new mongoose.Schema({
 AccountSchema.statics.toAPI = (doc) => ({
   username: doc.username,
   _id: doc._id,
+  isPremium: doc.isPremium,
 });
 
 // Helper function to hash a password

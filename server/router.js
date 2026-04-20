@@ -10,6 +10,12 @@ const router = (app) => {
   app.post('/signup', mid.requiresSecure, mid.requiresLogout, controllers.Account.signup);
   app.get('/logout', mid.requiresLogin, controllers.Account.logout);
 
+  app.get('/account', mid.requiresLogin, controllers.Account.accountPage);
+  app.get('/getAccountInfo', mid.requiresLogin, controllers.Account.getAccountInfo);
+  app.post('/changePassword', mid.requiresLogin, controllers.Account.changePassword);
+  app.post('/togglePremium', mid.requiresLogin, controllers.Account.togglePremium);
+
+
   app.get('/app', mid.requiresLogin, controllers.DanceMove.appPage);
 
   // Dance move routes
