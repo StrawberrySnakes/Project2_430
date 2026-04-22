@@ -24,6 +24,14 @@ const router = (app) => {
   app.get('/getPublicMoves', mid.requiresLogin, controllers.DanceMove.getPublicMoves);
   app.post('/deleteMove', mid.requiresLogin, controllers.DanceMove.deleteMove);
 
+  // Event routes
+  app.get('/events', mid.requiresLogin, controllers.Events.eventPage);
+  
+  app.post('/createEvent', mid.requiresLogin, controllers.Events.createEvent);
+  app.get('/getEvents', mid.requiresLogin, controllers.Events.getEvents);
+  app.get('/getPublicEvents', mid.requiresLogin, controllers.Events.getPublicEvents);
+  app.post('/deleteEvent', mid.requiresLogin, controllers.Events.deleteEvent);
+
   app.use((req, res) => res.status(404).render('404'));
 };
 

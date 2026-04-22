@@ -1,2 +1,29 @@
-{{!-- events.handlebars --}}
-{{!-- If time... page where community events  viewed and posted --}}
+{{!-- app.handlebars --}}
+{{!-- Make this the main posts page where people can upload and post their videos --}}
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>LRDC Archive - Events</title>
+  <link rel="shortcut icon" href="/assets/img/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="/assets/style.css"/>
+</head>
+<body>
+  <nav class="appNav">
+    <div class="navBrand">LRDC Archive</div>
+    <div class="navLinks">
+      <a href="/app">Feed</a>
+      <a href="/events">Events</a>
+      <a href="/account">Account</a>
+      <a href="/logout">Log Out</a>
+    </div>
+  </nav>
+
+  <main id="app"></main>
+
+  <div id="notification" class="hidden">
+    <span id="errorMessage"></span>
+  </div>
+
+  <script src="/assets/eventsBundle.js"></script>
+</body>
+</html>
