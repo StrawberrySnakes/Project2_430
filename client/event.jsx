@@ -1,17 +1,14 @@
-// client/app.jsx start 
-// Manages top-level view state and renders the page (Feed, My Moves, or Post) based on the active tab.
-
+//event.jsx - shows event feed, user's events, and form to post new event
 const helper = require('./helper.js');
 const React = require('react');
 const { useState, useEffect } = React;
 const { createRoot } = require('react-dom/client');
 
-const CATEGORIES = ['all', 'salsa', 'bachata', 'merengue', 'chacha', 'other'];
+const EVENT_CATEGORIES = ['social', 'lesson', 'workshop', 'festival', 'other'];
 
-// Row of pill buttons that filter the move feed by dance style.
-const CategoryFilter = ({ active, onChange }) => (
+const EventCategoryFilter = ({ active, onChange }) => (
   <div className="categoryFilter">
-    {CATEGORIES.map((cat) => (
+    {EVENT_CATEGORIES.map((cat) => (
       <button
         key={cat}
         className={`catBtn${active === cat ? ' catBtn--active' : ''}`}
@@ -23,54 +20,61 @@ const CategoryFilter = ({ active, onChange }) => (
   </div>
 );
 
-// Displays a single dance move post. Shows delete button only on owner's posts.
-const MoveCard = ({ move, onDelete }) => {
+const EventCard = ({ event, onDelete }) => {
   const categoryColors = {
-    salsa:    '#e8443a',
-    bachata:  '#c0392b',
-    merengue: '#f0a500',
-    chacha:   '#e67e22',
+    social:   '#e8443a',
+    lesson:   '#c0392b',
+    workshop: '#f0a500',
+    festival: '#e67e22',
     other:    '#8a7070',
   };
 
-  const accentColor = categoryColors[move.category] || '#8a7070';
+  const accentColor = categoryColors[event.category] || '#8a7070';
 
   return (
-    <article className="moveCard" style={{ '--accent': accentColor }}>
-      <div className="moveCard__header">
-        <span className="moveCard__category">{move.category}</span>
+    <article className="eventCard" style={{ '--accent': accentColor }}>
+      <div className="eventCard__header">
+        <span className="eventCard__category">{event.category}</span>
         {onDelete && (
           <button
-            className="moveCard__delete"
-            onClick={() => onDelete(move._id)}
-            aria-label="Delete move"
+            className="eventCard__delete"
+            onClick={() => onDelete(event._id)}
+            aria-label="Delete event"
           >
             ✕
           </button>
         )}
       </div>
 
-      <h3 className="moveCard__title">{move.title}</h3>
+      <h3 className="eventCard__title">{event.title}</h3>
 
-      {move.owner?.username && (
-        <p className="moveCard__author">by {move.owner.username}</p>
+      {event.owner?.username && (
+        <p className="eventCard__author">by {event.owner.username}</p>
       )}
 
-      <p className="moveCard__desc">{move.description}</p>
+      <p className="eventCard__desc">{event.description}</p>
 
-      {move.videoUrl && (
+      {event.imageUrl && (
+        <img
+          src={event.imageUrl}
+          alt={event.title}
+          className="eventCard__image"
+        />
+      )}
+
+      {event.imageUrl && (
         <a
-        className="moveCard__videoLink"
-        href={move.videoUrl}
+        className="eventCard__imageLink"
+        href={event.imageUrl}
         target="_blank"
         rel="noreferrer"
         >
-            Watch Video
+            View Image
         </a>
      )}
 
-      <time className="moveCard__date">
-        {new Date(move.createdDate).toLocaleDateString('en-US', {
+      <time className="eventCard__date">
+        {new Date(event.createdDate).toLocaleDateString('en-US', {
           month: 'short', day: 'numeric', year: 'numeric',
         })}
       </time>
@@ -78,40 +82,42 @@ const MoveCard = ({ move, onDelete }) => {
   );
 };
 
-// Fetches and displays public moves. Supports category filtering. Also Re-fetches when reloadTrigger changes.
-const MoveFeed = ({ reloadTrigger }) => {
-  const [moves, setMoves] = useState([]);
+
+
+// Fetches and displays public events. Supports category filtering. Also Re-fetches when reloadTrigger changes.
+const EventFeed = ({ reloadTrigger }) => {
+  const [events, setEvents] = useState([]);
   const [category, setCategory] = useState('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchMoves = async () => {
+    const fetchEvents = async () => {
       setLoading(true);
       const url = category === 'all'
-        ? '/getPublicMoves'
-        : `/getPublicMoves?category=${category}`;
+        ? '/getPublicEvents'
+        : `/getPublicEvents?category=${category}`;
       const response = await fetch(url);
       const data = await response.json();
-      setMoves(data.moves || []);
+      setEvents(data.events || []);
       setLoading(false);
     };
-    fetchMoves();
+    fetchEvents();
   }, [category, reloadTrigger]);
 
   return (
     <section className="feedSection">
-      <h2 className="sectionTitle">Community Feed</h2>
-      <CategoryFilter active={category} onChange={setCategory} />
+      <h2 className="sectionTitle">Event Feed</h2>
+      <EventCategoryFilter active={category} onChange={setCategory} />
 
       {loading && <p className="feedEmpty">Loading...</p>}
 
-      {!loading && moves.length === 0 && (
-        <p className="feedEmpty">No moves posted yet. Be the first!</p>
+      {!loading && events.length === 0 && (
+        <p className="feedEmpty">No events posted yet. Be the first!</p>
       )}
 
       <div className="moveGrid">
-        {moves.map((move) => (
-          <MoveCard key={move._id} move={move} />
+        {events.map((event) => (
+          <EventCard key={event._id} event={event} />
         ))}
       </div>
     </section>
@@ -119,63 +125,63 @@ const MoveFeed = ({ reloadTrigger }) => {
 };
 
 // Shows the logged-in user's own posts, with delete capability.
-const MyMoves = ({ reloadTrigger }) => {
-  const [moves, setMoves] = useState([]);
+const MyEvents = ({ reloadTrigger }) => {
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const loadMoves = async () => {
+  const loadEvents = async () => {
     setLoading(true);
-    const response = await fetch('/getMoves');
+    const response = await fetch('/getEvents');
     const data = await response.json();
-    setMoves(data.moves || []);
+    setEvents(data.events || []);
     setLoading(false);
   };
 
-  useEffect(() => { loadMoves(); }, [reloadTrigger]);
+  useEffect(() => { loadEvents(); }, [reloadTrigger]);
 
   const handleDelete = (id) => {
-    helper.sendPost('/deleteMove', { id }, () => {
-      setMoves((prev) => prev.filter((m) => m._id !== id));
+    helper.sendPost('/deleteEvent', { id }, () => {
+      setEvents((prev) => prev.filter((e) => e._id !== id));
     });
   };
 
   return (
     <section className="feedSection">
-      <h2 className="sectionTitle">My Moves</h2>
+      <h2 className="sectionTitle">My Events</h2>
 
       {loading && <p className="feedEmpty">Loading...</p>}
 
-      {!loading && moves.length === 0 && (
-        <p className="feedEmpty">You haven't posted any moves yet.</p>
+      {!loading && events.length === 0 && (
+        <p className="feedEmpty">You haven't posted any events yet.</p>
       )}
 
       <div className="moveGrid">
-        {moves.map((move) => (
-          <MoveCard key={move._id} move={move} onDelete={handleDelete} />
+        {events.map((event) => (
+          <EventCard key={event._id} event={event} onDelete={handleDelete} />
         ))}
       </div>
     </section>
   );
 };
 
-// Form for submitting a new dance move post.
-const CreateMoveForm = ({ onSuccess }) => {
+// Form for submitting a new event.
+const CreateEventForm = ({ onSuccess }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     helper.hideError();
 
-    const title       = e.target.querySelector('#moveTitle').value.trim();
-    const description = e.target.querySelector('#moveDesc').value.trim();
-    const category    = e.target.querySelector('#moveCategory').value;
-    const videoUrl    = e.target.querySelector('#moveVideo').value.trim();
-    const isPublic    = e.target.querySelector('#movePublic').checked;
+    const title       = e.target.querySelector('#eventTitle').value.trim();
+    const description = e.target.querySelector('#eventDesc').value.trim();
+    const category    = e.target.querySelector('#eventCategory').value;
+    const image    = e.target.querySelector('#eventImage').value.trim();
+    const isPublic    = e.target.querySelector('#eventPublic').checked;
 
     if (!title || !description || !category) {
       helper.handleError('Title, description, and category are required.');
       return false;
     }
 
-    helper.sendPost('/createMove', { title, description, category, videoUrl, isPublic }, (result) => {
+    helper.sendPost('/createEvent', { title, description, category, image, isPublic }, (result) => {
       if (!result.error) {
         e.target.reset();
         if (onSuccess) onSuccess();
@@ -187,24 +193,24 @@ const CreateMoveForm = ({ onSuccess }) => {
 
   return (
     <section className="formSection">
-      <h2 className="sectionTitle">Post a Move</h2>
-      <form id="createMoveForm" className="moveForm" onSubmit={handleSubmit}>
+      <h2 className="sectionTitle">Post an Event</h2>
+      <form id="createEventForm" className="eventForm" onSubmit={handleSubmit}>
 
         <div className="formGroup">
-          <label htmlFor="moveTitle">Move Name</label>
+          <label htmlFor="eventTitle">Event Name</label>
           <input
-            id="moveTitle"
+            id="eventTitle"
             type="text"
             name="title"
-            placeholder="e.g. Cross Body Lead"
+            placeholder="e.g. salsa night at Club XYZ"
             maxLength={60}
           />
         </div>
 
         <div className="formGroup">
-          <label htmlFor="moveCategory">Style</label>
-          <select id="moveCategory" name="category" className="moveSelect">
-            {CATEGORIES.filter((c) => c !== 'all').map((cat) => (
+          <label htmlFor="eventCategory">Type</label>
+          <select id="eventCategory" name="category" className="eventSelect">
+            {EVENT_CATEGORIES.filter((c) => c !== 'all').map((cat) => (
               <option key={cat} value={cat}>
                 {cat.charAt(0).toUpperCase() + cat.slice(1)}
               </option>
@@ -213,32 +219,32 @@ const CreateMoveForm = ({ onSuccess }) => {
         </div>
 
         <div className="formGroup">
-          <label htmlFor="moveDesc">Description</label>
+          <label htmlFor="eventDesc">Description</label>
           <textarea
-            id="moveDesc"
+            id="eventDesc"
             name="description"
-            placeholder="Describe the footwork, timing, and lead/follow cues..."
+            placeholder="Describe the event details, location, time, and any other relevant info..."
             rows={4}
             maxLength={500}
           />
         </div>
 
         <div className="formGroup">
-          <label htmlFor="moveVideo">Video URL <span className="optional">(optional)</span></label>
+          <label htmlFor="eventImage">Image URL <span className="optional">(optional)</span></label>
           <input
-            id="moveVideo"
+            id="eventImage"
             type="url"
-            name="videoUrl"
-            placeholder="https://youtube.com/..."
+            name="image"
+            placeholder="https://example.com/image.jpg"
           />
         </div>
 
         <div className="formGroup formGroup--inline">
-          <input id="movePublic" type="checkbox" name="isPublic" defaultChecked />
-          <label htmlFor="movePublic">Post to community feed</label>
+          <input id="eventPublic" type="checkbox" name="isPublic" defaultChecked />
+          <label htmlFor="eventPublic">Post to community feed</label>
         </div>
 
-        <button className="submitBtn" type="submit">Post Move</button>
+        <button className="submitBtn" type="submit">Post Event</button>
       </form>
     </section>
   );
@@ -264,29 +270,24 @@ const App = () => {
           className={`tabBtn${activeTab === 'feed' ? ' tabBtn--active' : ''}`}
           onClick={() => setActiveTab('feed')}
         >
-          Community Feed
+          Event Feed
         </button>
         <button
-          className={`tabBtn${activeTab === 'mine' ? ' tabBtn--active' : ''}`}
-          onClick={() => setActiveTab('mine')}
+          className={`tabBtn${activeTab === 'post_event' ? ' tabBtn--active' : ''}`}
+          onClick={() => setActiveTab('post_event')}
         >
-          My Moves
-        </button>
-        <button
-          className={`tabBtn${activeTab === 'post' ? ' tabBtn--active' : ''}`}
-          onClick={() => setActiveTab('post')}
-        >
-          + Post a Move
+          + Post an Event
         </button>
       </div>
 
-      {activeTab === 'feed' && <MoveFeed reloadTrigger={reloadTrigger} />}
-      {activeTab === 'mine' && <MyMoves reloadTrigger={reloadTrigger} />}
-      {activeTab === 'post' && <CreateMoveForm onSuccess={handlePostSuccess} />}
+      {activeTab === 'feed' && <EventFeed reloadTrigger={reloadTrigger} />}
+      {activeTab === 'mine' && <MyEvents reloadTrigger={reloadTrigger} />}
+      {activeTab === 'post' && <CreateEventForm onSuccess={handlePostSuccess} />}
+      {activeTab === 'post_event' && <CreateEventForm onSuccess={handlePostSuccess} />}
     </div>
   );
 };
 
 window.onload = () => {
-  createRoot(document.getElementById('app')).render(<App />);
+  createRoot(document.getElementById('eventApp')).render(<EventsPage />);
 };

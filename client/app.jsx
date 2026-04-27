@@ -100,7 +100,7 @@ const MoveFeed = ({ reloadTrigger }) => {
 
   return (
     <section className="feedSection">
-      <h2 className="sectionTitle">Community Feed</h2>
+      <h2 className="sectionTitle">Archive</h2>
       <CategoryFilter active={category} onChange={setCategory} />
 
       {loading && <p className="feedEmpty">Loading...</p>}
@@ -283,6 +283,7 @@ const App = () => {
       {activeTab === 'feed' && <MoveFeed reloadTrigger={reloadTrigger} />}
       {activeTab === 'mine' && <MyMoves reloadTrigger={reloadTrigger} />}
       {activeTab === 'post' && <CreateMoveForm onSuccess={handlePostSuccess} />}
+      {activeTab === 'post_event' && <CreateEventForm onSuccess={handlePostSuccess} />}
     </div>
   );
 };

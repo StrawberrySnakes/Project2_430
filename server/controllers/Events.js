@@ -14,7 +14,7 @@ const eventPage = (req, res) => res.render('events');
 
 // Creates a new event for the logged-in user
 const createEvent = async (req, res) => {
-  const { title, description, category, videoUrl, isPublic } = req.body;
+  const { title, description, category, imageUrl, isPublic } = req.body;
 
   if (!title || !description || !category) {
     return res.status(400).json({ error: 'Title, description, and category are required.' });
@@ -28,7 +28,7 @@ const createEvent = async (req, res) => {
     title,
     description,
     category,
-    imageURL: videoUrl || '',
+    imageURL: imageUrl || '',
     isPublic: isPublic === true || isPublic === 'true',
     owner: req.session.account._id,
   };
@@ -47,7 +47,7 @@ const createEvent = async (req, res) => {
 const getEvents = async (req, res) => {
   try {
     const docs = await Events.find({ owner: req.session.account._id })
-      .select('title description category videoUrl isPublic createdDate')
+      .select('title description category imageURL isPublic createdDate')
       .lean()
       .exec();
     return res.json({ events: docs });
