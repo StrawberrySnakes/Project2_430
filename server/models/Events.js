@@ -26,12 +26,16 @@ const EventSchema = new mongoose.Schema({
     enum: ['social','lesson', 'workshop', 'festival', 'other'],
     default: 'other',
   },
-
-  imageUrl: {
+  mediaUrl: {
     type: String,
     trim: true,
     default: '',
-  },  
+  },
+  mediaType: {
+    type: String,
+    enum: ['video', 'image', 'link'],
+    default: 'link',
+  },
   // Controls whether this post appears on the public feed or only to the owner
   isPublic: {
     type: Boolean,
@@ -54,6 +58,8 @@ EventSchema.statics.toAPI = (doc) => ({
   description: doc.description,
   category: doc.category,
   imageUrl: doc.imageUrl,
+  mediaUrl: doc.mediaUrl,
+  mediaType: doc.mediaType,
   isPublic: doc.isPublic,
   createdDate: doc.createdDate,
 });

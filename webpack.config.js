@@ -5,6 +5,8 @@ module.exports = {
         app: './client/app.jsx',
         login: './client/login.jsx',
         account: './client/account.jsx',
+        events: './client/event.jsx',
+
     },
     module: {
         rules: [

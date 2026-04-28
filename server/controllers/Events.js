@@ -24,11 +24,22 @@ const createEvent = async (req, res) => {
     return res.status(400).json({ error: 'Invalid category.' });
   }
 
+  let resolvedMediaUrl = '';
+  let mediaType = 'link';
+ 
+  if (req.file) {
+    resolvedMediaUrl = `/assets/uploads/${req.file.filename}`;
+    mediaType = req.file.mimetype.startsWith('video') ? 'video' : 'image';
+  }
+
+
   const eventData = {
     title,
     description,
     category,
     imageURL: imageUrl || '',
+    mediaURL: resolvedMediaUrl,
+    mediaType,
     isPublic: isPublic === true || isPublic === 'true',
     owner: req.session.account._id,
   };
@@ -103,10 +114,69 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+// Proxies a Google Places Nearby Search so the API key is never exposed.
+const getNearbyVenues = async (req, res) => {
+  const { lat, lng, radius = 10000 } = req.query;
+ 
+  if (!lat || !lng) {
+    return res.status(400).json({ error: 'lat and lng query parameters are required.' });
+  }
+ 
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: 'Maps API key is not configured on the server.' });
+  }
+ 
+  // Search for latin dance venues using two keyword passes and merge results
+  const keywords = ['latin dance salsa', 'salsa club bachata'];
+  const seen = new Set();
+  const allVenues = [];
+ 
+  try {
+    for (const keyword of keywords) {
+      const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
+      url.searchParams.set('location', `${lat},${lng}`);
+      url.searchParams.set('radius', Math.min(Number(radius), 50000)); // cap at 50 km
+      url.searchParams.set('keyword', keyword);
+      url.searchParams.set('key', apiKey);
+ 
+      const response = await fetch(url.toString());
+      const data = await response.json();
+ 
+      if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+        console.log('Places API error:', data.status, data.error_message);
+        // Continue to next keyword rather than failing
+        continue;
+      }
+ 
+      for (const place of data.results || []) {
+        if (!seen.has(place.place_id)) {
+          seen.add(place.place_id);
+          allVenues.push(place);
+        }
+      }
+    }
+ 
+    // Sort
+    allVenues.sort((a, b) => {
+      const aOpen = a.opening_hours?.open_now ? 1 : 0;
+      const bOpen = b.opening_hours?.open_now ? 1 : 0;
+      if (bOpen !== aOpen) return bOpen - aOpen;
+      return (b.rating || 0) - (a.rating || 0);
+    });
+ 
+    return res.json({ venues: allVenues });
+  } catch (err) {
+    console.log('getNearbyVenues error:', err);
+    return res.status(500).json({ error: 'Failed to fetch venues from Google Maps.' });
+  }
+};
+
 module.exports = {
   eventPage,
   createEvent,
   getEvents,
   getPublicEvents,
   deleteEvent,
+  getNearbyVenues,
 };

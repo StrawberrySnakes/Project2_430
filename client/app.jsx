@@ -1,4 +1,4 @@
-// client/app.jsx start 
+// client/app.jsx
 // Manages top-level view state and renders the page (Feed, My Moves, or Post) based on the active tab.
 
 const helper = require('./helper.js');
@@ -22,6 +22,45 @@ const CategoryFilter = ({ active, onChange }) => (
     ))}
   </div>
 );
+
+// Renders the media attached to a move (uploaded file or external link).
+const MoveMedia = ({ move }) => {
+  if (!move.mediaUrl && !move.videoUrl) return null;
+
+  // Uploaded file takes priority
+  if (move.mediaUrl) {
+    if (move.mediaType === 'video') {
+      return (
+        <video
+          className="moveCard__media"
+          src={move.mediaUrl}
+          controls
+          preload="metadata"
+        />
+      );
+    }
+    return (
+      <img
+        className="moveCard__media"
+        src={move.mediaUrl}
+        alt={move.title}
+        loading="lazy"
+      />
+    );
+  }
+
+  // Fallback: external video link
+  return (
+    <a
+      className="moveCard__videoLink"
+      href={move.videoUrl}
+      target="_blank"
+      rel="noreferrer"
+    >
+      Watch Video
+    </a>
+  );
+};
 
 // Displays a single dance move post. Shows delete button only on owner's posts.
 const MoveCard = ({ move, onDelete }) => {
@@ -58,16 +97,7 @@ const MoveCard = ({ move, onDelete }) => {
 
       <p className="moveCard__desc">{move.description}</p>
 
-      {move.videoUrl && (
-        <a
-        className="moveCard__videoLink"
-        href={move.videoUrl}
-        target="_blank"
-        rel="noreferrer"
-        >
-            Watch Video
-        </a>
-     )}
+      <MoveMedia move={move} />
 
       <time className="moveCard__date">
         {new Date(move.createdDate).toLocaleDateString('en-US', {
@@ -78,7 +108,7 @@ const MoveCard = ({ move, onDelete }) => {
   );
 };
 
-// Fetches and displays public moves. Supports category filtering. Also Re-fetches when reloadTrigger changes.
+// Fetches and displays public moves. Supports category filtering.
 const MoveFeed = ({ reloadTrigger }) => {
   const [moves, setMoves] = useState([]);
   const [category, setCategory] = useState('all');
@@ -159,7 +189,24 @@ const MyMoves = ({ reloadTrigger }) => {
 };
 
 // Form for submitting a new dance move post.
+// Supports both a direct file upload (video or photo) and an external URL.
 const CreateMoveForm = ({ onSuccess }) => {
+  const [mediaPreview, setMediaPreview] = useState(null);
+  const [mediaType, setMediaType] = useState(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) { setMediaPreview(null); setMediaType(null); return; }
+    setMediaType(file.type.startsWith('video') ? 'video' : 'image');
+    setMediaPreview(URL.createObjectURL(file));
+  };
+
+  const clearFile = () => {
+    document.getElementById('moveFile').value = '';
+    setMediaPreview(null);
+    setMediaType(null);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     helper.hideError();
@@ -169,15 +216,27 @@ const CreateMoveForm = ({ onSuccess }) => {
     const category    = e.target.querySelector('#moveCategory').value;
     const videoUrl    = e.target.querySelector('#moveVideo').value.trim();
     const isPublic    = e.target.querySelector('#movePublic').checked;
+    const file        = e.target.querySelector('#moveFile').files[0];
 
     if (!title || !description || !category) {
       helper.handleError('Title, description, and category are required.');
       return false;
     }
 
-    helper.sendPost('/createMove', { title, description, category, videoUrl, isPublic }, (result) => {
+    // Use FormData so we can attach the file
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('category', category);
+    formData.append('videoUrl', videoUrl);
+    formData.append('isPublic', isPublic);
+    if (file) formData.append('media', file);
+
+    helper.sendPost('/createMove', formData, (result) => {
       if (!result.error) {
         e.target.reset();
+        setMediaPreview(null);
+        setMediaType(null);
         if (onSuccess) onSuccess();
       }
     });
@@ -223,8 +282,37 @@ const CreateMoveForm = ({ onSuccess }) => {
           />
         </div>
 
+        {/* ── Upload your own file ── */}
         <div className="formGroup">
-          <label htmlFor="moveVideo">Video URL <span className="optional">(optional)</span></label>
+          <label htmlFor="moveFile">
+            Upload Video or Photo <span className="optional">(optional)</span>
+          </label>
+          <input
+            id="moveFile"
+            type="file"
+            name="media"
+            accept="video/*,image/*"
+            onChange={handleFileChange}
+            className="fileInput"
+          />
+          {mediaPreview && (
+            <div className="mediaPreviewWrap">
+              {mediaType === 'video'
+                ? <video src={mediaPreview} controls className="mediaPreview" />
+                : <img src={mediaPreview} alt="Preview" className="mediaPreview" />
+              }
+              <button type="button" className="clearMediaBtn" onClick={clearFile}>
+                Remove
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* ── Or paste an external URL ── */}
+        <div className="formGroup">
+          <label htmlFor="moveVideo">
+            Or paste a Video URL <span className="optional">(optional)</span>
+          </label>
           <input
             id="moveVideo"
             type="url"
@@ -251,7 +339,6 @@ const App = () => {
 
   const triggerReload = () => setReloadTrigger((r) => !r);
 
-  // After posting -- switch back to feed and reload it
   const handlePostSuccess = () => {
     triggerReload();
     setActiveTab('feed');
@@ -283,7 +370,6 @@ const App = () => {
       {activeTab === 'feed' && <MoveFeed reloadTrigger={reloadTrigger} />}
       {activeTab === 'mine' && <MyMoves reloadTrigger={reloadTrigger} />}
       {activeTab === 'post' && <CreateMoveForm onSuccess={handlePostSuccess} />}
-      {activeTab === 'post_event' && <CreateEventForm onSuccess={handlePostSuccess} />}
     </div>
   );
 };

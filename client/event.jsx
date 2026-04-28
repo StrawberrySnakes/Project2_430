@@ -4,11 +4,12 @@ const React = require('react');
 const { useState, useEffect } = React;
 const { createRoot } = require('react-dom/client');
 
+const EVENT_CATEGORIES_ALL = ['all', 'social', 'lesson', 'workshop', 'festival', 'other'];
 const EVENT_CATEGORIES = ['social', 'lesson', 'workshop', 'festival', 'other'];
 
 const EventCategoryFilter = ({ active, onChange }) => (
   <div className="categoryFilter">
-    {EVENT_CATEGORIES.map((cat) => (
+    {EVENT_CATEGORIES_ALL.map((cat) => (
       <button
         key={cat}
         className={`catBtn${active === cat ? ' catBtn--active' : ''}`}
@@ -19,6 +20,28 @@ const EventCategoryFilter = ({ active, onChange }) => (
     ))}
   </div>
 );
+
+// Renders the media attached to an event (uploaded file or external image URL).
+const EventMedia = ({ event }) => {
+  if (!event.mediaUrl && !event.imageUrl) return null;
+ 
+  if (event.mediaUrl) {
+    if (event.mediaType === 'video') {
+      return <video className="eventCard__media" src={event.mediaUrl} controls preload="metadata" />;
+    }
+    return <img className="eventCard__media" src={event.mediaUrl} alt={event.title} loading="lazy" />;
+  }
+ 
+  // Fallback: external image URL
+  return (
+    <>
+      <img className="eventCard__image" src={event.imageUrl} alt={event.title} loading="lazy" />
+      <a className="eventCard__imageLink" href={event.imageUrl} target="_blank" rel="noreferrer">
+        View Image
+      </a>
+    </>
+  );
+};
 
 const EventCard = ({ event, onDelete }) => {
   const categoryColors = {
@@ -54,24 +77,7 @@ const EventCard = ({ event, onDelete }) => {
 
       <p className="eventCard__desc">{event.description}</p>
 
-      {event.imageUrl && (
-        <img
-          src={event.imageUrl}
-          alt={event.title}
-          className="eventCard__image"
-        />
-      )}
-
-      {event.imageUrl && (
-        <a
-        className="eventCard__imageLink"
-        href={event.imageUrl}
-        target="_blank"
-        rel="noreferrer"
-        >
-            View Image
-        </a>
-     )}
+      <EventMedia event={event} />
 
       <time className="eventCard__date">
         {new Date(event.createdDate).toLocaleDateString('en-US', {
@@ -108,13 +114,13 @@ const EventFeed = ({ reloadTrigger }) => {
     <section className="feedSection">
       <h2 className="sectionTitle">Event Feed</h2>
       <EventCategoryFilter active={category} onChange={setCategory} />
-
+ 
       {loading && <p className="feedEmpty">Loading...</p>}
-
+ 
       {!loading && events.length === 0 && (
         <p className="feedEmpty">No events posted yet. Be the first!</p>
       )}
-
+ 
       <div className="moveGrid">
         {events.map((event) => (
           <EventCard key={event._id} event={event} />
@@ -166,6 +172,22 @@ const MyEvents = ({ reloadTrigger }) => {
 
 // Form for submitting a new event.
 const CreateEventForm = ({ onSuccess }) => {
+  const [mediaPreview, setMediaPreview] = useState(null);
+  const [mediaType, setMediaType] = useState(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) { setMediaPreview(null); setMediaType(null); return; }
+    setMediaType(file.type.startsWith('video') ? 'video' : 'image');
+    setMediaPreview(URL.createObjectURL(file));
+  };
+ 
+  const clearFile = () => {
+    document.getElementById('eventFile').value = '';
+    setMediaPreview(null);
+    setMediaType(null);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     helper.hideError();
@@ -173,21 +195,32 @@ const CreateEventForm = ({ onSuccess }) => {
     const title       = e.target.querySelector('#eventTitle').value.trim();
     const description = e.target.querySelector('#eventDesc').value.trim();
     const category    = e.target.querySelector('#eventCategory').value;
-    const image    = e.target.querySelector('#eventImage').value.trim();
+    const imageUrl    = e.target.querySelector('#eventImage').value.trim();
     const isPublic    = e.target.querySelector('#eventPublic').checked;
-
+    const file        = e.target.querySelector('#eventFile').files[0];
+ 
     if (!title || !description || !category) {
       helper.handleError('Title, description, and category are required.');
       return false;
     }
 
-    helper.sendPost('/createEvent', { title, description, category, image, isPublic }, (result) => {
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('category', category);
+    formData.append('imageUrl', imageUrl);
+    formData.append('isPublic', isPublic);
+    if (file) formData.append('media', file);
+
+    helper.sendPost('/createEvent', formData, (result) => {
       if (!result.error) {
         e.target.reset();
+        setMediaPreview(null);
+        setMediaType(null);
         if (onSuccess) onSuccess();
       }
     });
-
+ 
     return false;
   };
 
@@ -195,29 +228,29 @@ const CreateEventForm = ({ onSuccess }) => {
     <section className="formSection">
       <h2 className="sectionTitle">Post an Event</h2>
       <form id="createEventForm" className="eventForm" onSubmit={handleSubmit}>
-
+ 
         <div className="formGroup">
           <label htmlFor="eventTitle">Event Name</label>
           <input
             id="eventTitle"
             type="text"
             name="title"
-            placeholder="e.g. salsa night at Club XYZ"
+            placeholder="e.g. Salsa Night at Club XYZ"
             maxLength={60}
           />
         </div>
-
+ 
         <div className="formGroup">
           <label htmlFor="eventCategory">Type</label>
           <select id="eventCategory" name="category" className="eventSelect">
-            {EVENT_CATEGORIES.filter((c) => c !== 'all').map((cat) => (
+            {EVENT_CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>
                 {cat.charAt(0).toUpperCase() + cat.slice(1)}
               </option>
             ))}
           </select>
         </div>
-
+ 
         <div className="formGroup">
           <label htmlFor="eventDesc">Description</label>
           <textarea
@@ -228,24 +261,184 @@ const CreateEventForm = ({ onSuccess }) => {
             maxLength={500}
           />
         </div>
-
+ 
+        {/* ── Upload flyer / photo / video ── */}
         <div className="formGroup">
-          <label htmlFor="eventImage">Image URL <span className="optional">(optional)</span></label>
+          <label htmlFor="eventFile">
+            Upload Flyer or Photo <span className="optional">(optional)</span>
+          </label>
+          <input
+            id="eventFile"
+            type="file"
+            name="media"
+            accept="image/*,video/*"
+            onChange={handleFileChange}
+            className="fileInput"
+          />
+          {mediaPreview && (
+            <div className="mediaPreviewWrap">
+              {mediaType === 'video'
+                ? <video src={mediaPreview} controls className="mediaPreview" />
+                : <img src={mediaPreview} alt="Preview" className="mediaPreview" />
+              }
+              <button type="button" className="clearMediaBtn" onClick={clearFile}>
+                Remove
+              </button>
+            </div>
+          )}
+        </div>
+ 
+        {/* ── Or paste an external URL ── */}
+        <div className="formGroup">
+          <label htmlFor="eventImage">
+            Or paste an Image URL <span className="optional">(optional)</span>
+          </label>
           <input
             id="eventImage"
             type="url"
-            name="image"
-            placeholder="https://example.com/image.jpg"
+            name="imageUrl"
+            placeholder="https://example.com/flyer.jpg"
           />
         </div>
-
+ 
         <div className="formGroup formGroup--inline">
           <input id="eventPublic" type="checkbox" name="isPublic" defaultChecked />
           <label htmlFor="eventPublic">Post to community feed</label>
         </div>
-
+ 
         <button className="submitBtn" type="submit">Post Event</button>
       </form>
+    </section>
+  );
+};
+
+
+// Single venue card from the Google Places results.
+const VenueCard = ({ venue }) => {
+  const mapsUrl = `https://www.google.com/maps/place/?q=place_id:${venue.place_id}`;
+  const stars = venue.rating ? '★'.repeat(Math.round(venue.rating)) + '☆'.repeat(5 - Math.round(venue.rating)) : null;
+ 
+  return (
+    <article className="eventCard" style={{ '--accent': '#e8443a' }}>
+      <div className="eventCard__header">
+        <span className="eventCard__category">venue</span>
+        {venue.opening_hours && (
+          <span className={venue.opening_hours.open_now ? 'venueOpen' : 'venueClosed'}>
+            {venue.opening_hours.open_now ? 'Open now' : 'Closed'}
+          </span>
+        )}
+      </div>
+ 
+      <h3 className="eventCard__title">{venue.name}</h3>
+      <p className="eventCard__desc">{venue.vicinity}</p>
+ 
+      {stars && (
+        <p className="venueRating">
+          <span className="venueStars">{stars}</span>
+          {' '}{venue.rating} ({venue.user_ratings_total?.toLocaleString()} reviews)
+        </p>
+      )}
+ 
+      {venue.types && (
+        <p className="venueTags">
+          {venue.types
+            .filter((t) => !['point_of_interest', 'establishment'].includes(t))
+            .slice(0, 3)
+            .map((t) => t.replace(/_/g, ' '))
+            .join(' · ')}
+        </p>
+      )}
+ 
+      <a href={mapsUrl} className="moveCard__videoLink" target="_blank" rel="noreferrer">
+        View on Google Maps →
+      </a>
+    </article>
+  );
+};
+ 
+// Prompts for geolocation then fetches nearby latin dance venues via our API.
+const NearbyVenues = () => {
+  const [venues, setVenues] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [searched, setSearched] = useState(false);
+  const [radius, setRadius] = useState(10);  // km
+ 
+  const findVenues = () => {
+    setError('');
+    setLoading(true);
+ 
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser.');
+      setLoading(false);
+      return;
+    }
+ 
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        try {
+          const res = await fetch(
+            `/api/venues?lat=${latitude}&lng=${longitude}&radius=${radius * 1000}`
+          );
+          const data = await res.json();
+          if (data.error) {
+            setError(data.error);
+          } else {
+            setVenues(data.venues || []);
+          }
+        } catch {
+          setError('Failed to fetch venues. Please try again.');
+        }
+        setLoading(false);
+        setSearched(true);
+      },
+      () => {
+        setError('Location access denied. Please enable location permissions and try again.');
+        setLoading(false);
+      },
+      { timeout: 10000 }
+    );
+  };
+ 
+  return (
+    <section className="feedSection">
+      <h2 className="sectionTitle">Latin Dance Venues Near You</h2>
+      <p className="feedSubtitle">
+        Discover salsa clubs, dance studios, and social nights in your area.
+      </p>
+ 
+      <div className="venueControls">
+        <label htmlFor="radiusSelect" className="venueRadiusLabel">Search radius:</label>
+        <select
+          id="radiusSelect"
+          className="moveSelect venueRadiusSelect"
+          value={radius}
+          onChange={(e) => setRadius(Number(e.target.value))}
+        >
+          <option value={5}>5 km</option>
+          <option value={10}>10 km</option>
+          <option value={25}>25 km</option>
+          <option value={50}>50 km</option>
+        </select>
+        <button className="submitBtn venueSearchBtn" onClick={findVenues} disabled={loading}>
+          {loading ? 'Searching...' : searched ? 'Search Again' : 'Find Venues'}
+        </button>
+      </div>
+ 
+      {error && <p className="feedEmpty feedEmpty--error">{error}</p>}
+ 
+      {!loading && searched && venues.length === 0 && !error && (
+        <p className="feedEmpty">
+          No latin dance venues found within {radius} km. Try expanding your search radius.
+        </p>
+      )}
+ 
+      <div className="moveGrid">
+        {venues.map((venue) => (
+          <VenueCard key={venue.place_id} venue={venue} />
+        ))}
+      </div>
     </section>
   );
 };
@@ -273,21 +466,33 @@ const App = () => {
           Event Feed
         </button>
         <button
+          className={`tabBtn${activeTab === 'mine' ? ' tabBtn--active' : ''}`}
+          onClick={() => setActiveTab('mine')}
+        >
+          My Events
+        </button>
+        <button
           className={`tabBtn${activeTab === 'post_event' ? ' tabBtn--active' : ''}`}
           onClick={() => setActiveTab('post_event')}
         >
           + Post an Event
         </button>
+        <button
+          className={`tabBtn${activeTab === 'venues' ? ' tabBtn--active' : ''}`}
+          onClick={() => setActiveTab('venues')}
+        >
+          📍 Nearby Venues
+        </button>
       </div>
-
-      {activeTab === 'feed' && <EventFeed reloadTrigger={reloadTrigger} />}
-      {activeTab === 'mine' && <MyEvents reloadTrigger={reloadTrigger} />}
-      {activeTab === 'post' && <CreateEventForm onSuccess={handlePostSuccess} />}
+ 
+      {activeTab === 'feed'       && <EventFeed reloadTrigger={reloadTrigger} />}
+      {activeTab === 'mine'       && <MyEvents reloadTrigger={reloadTrigger} />}
       {activeTab === 'post_event' && <CreateEventForm onSuccess={handlePostSuccess} />}
+      {activeTab === 'venues'     && <NearbyVenues />}
     </div>
   );
 };
 
 window.onload = () => {
-  createRoot(document.getElementById('eventApp')).render(<EventsPage />);
+  createRoot(document.getElementById('eventApp')).render(<App />);
 };

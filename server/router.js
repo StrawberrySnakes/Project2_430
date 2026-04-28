@@ -32,6 +32,9 @@ const router = (app) => {
   app.get('/getPublicEvents', mid.requiresLogin, controllers.Events.getPublicEvents);
   app.post('/deleteEvent', mid.requiresLogin, controllers.Events.deleteEvent);
 
+  app.get('/api/venues', mid.requiresLogin, controllers.Events.getNearbyVenues);
+
+
   app.use((req, res) => res.status(404).render('404'));
 };
 

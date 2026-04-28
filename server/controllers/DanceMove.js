@@ -24,15 +24,26 @@ const createMove = async (req, res) => {
     return res.status(400).json({ error: 'Invalid category.' });
   }
 
+  let resolvedMediaUrl = '';
+  let mediaType = 'link';
+ 
+  if (req.file) {
+    // Files land in hosted/uploads/ which is served at /assets/uploads/
+    resolvedMediaUrl = `/assets/uploads/${req.file.filename}`;
+    mediaType = req.file.mimetype.startsWith('video') ? 'video' : 'image';
+  }
+ 
   const moveData = {
     title,
     description,
     category,
-    videoUrl: videoUrl || '',
+    videoUrl:  videoUrl || '',
+    mediaUrl:  resolvedMediaUrl,
+    mediaType,
     isPublic: isPublic === true || isPublic === 'true',
     owner: req.session.account._id,
   };
-
+ 
   try {
     const newMove = new DanceMove(moveData);
     await newMove.save();
@@ -42,12 +53,12 @@ const createMove = async (req, res) => {
     return res.status(500).json({ error: 'An error occurred creating the move.' });
   }
 };
-
+ 
 // Returns only the logged-in user's own moves
 const getMoves = async (req, res) => {
   try {
     const docs = await DanceMove.find({ owner: req.session.account._id })
-      .select('title description category videoUrl isPublic createdDate')
+      .select('title description category videoUrl mediaUrl mediaType isPublic createdDate')
       .lean()
       .exec();
     return res.json({ moves: docs });
@@ -56,53 +67,53 @@ const getMoves = async (req, res) => {
     return res.status(500).json({ error: 'Error retrieving moves.' });
   }
 };
-
+ 
 // Returns all public moves (the community feed)
-// ?category=salsa to filter by style
+// ?category=salsa  to filter by style
 const getPublicMoves = async (req, res) => {
   try {
     const query = { isPublic: true };
     if (req.query.category && VALID_CATEGORIES.includes(req.query.category)) {
       query.category = req.query.category;
     }
-
+ 
     const docs = await DanceMove.find(query)
-      .select('title description category videoUrl createdDate owner')
-      .populate('owner', 'username') // attach username to each post
-      .sort({ createdDate: -1 })     // newest first
+      .select('title description category videoUrl mediaUrl mediaType createdDate owner')
+      .populate('owner', 'username')
+      .sort({ createdDate: -1 })
       .lean()
       .exec();
-
+ 
     return res.json({ moves: docs });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: 'Error retrieving public moves.' });
   }
 };
-
+ 
 // Deletes a move only if the logged-in user owns it
 const deleteMove = async (req, res) => {
   if (!req.body.id) {
     return res.status(400).json({ error: 'Move ID is required.' });
   }
-
+ 
   try {
     const result = await DanceMove.deleteOne({
       _id: req.body.id,
-      owner: req.session.account._id, // prevents deleting someone else's move
+      owner: req.session.account._id,
     });
-
+ 
     if (result.deletedCount === 0) {
       return res.status(404).json({ error: 'Move not found or not authorized.' });
     }
-
+ 
     return res.json({ message: 'Move deleted.' });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: 'Error deleting move.' });
   }
 };
-
+ 
 module.exports = {
   appPage,
   createMove,
