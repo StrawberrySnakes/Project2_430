@@ -76,14 +76,18 @@ const getPublicMoves = async (req, res) => {
     if (req.query.category && VALID_CATEGORIES.includes(req.query.category)) {
       query.category = req.query.category;
     }
- 
+    // Text search — if provided, add $text filter
+    if (req.query.search && req.query.search.trim()) {
+      query.$text = { $search: req.query.search.trim() };
+    }
+
     const docs = await DanceMove.find(query)
       .select('title description category videoUrl mediaUrl mediaType createdDate owner')
       .populate('owner', 'username')
       .sort({ createdDate: -1 })
       .lean()
       .exec();
- 
+
     return res.json({ moves: docs });
   } catch (err) {
     console.log(err);

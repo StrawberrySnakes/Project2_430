@@ -88,12 +88,26 @@ const EventCard = ({ event, onDelete }) => {
   );
 };
 
-
+const SearchBar = ({ value, onChange }) => (
+  <div className="searchBar">
+    <input
+      type="text"
+      className="searchBar__input"
+      placeholder="Search moves by name or description..."
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+    {value && (
+      <button className="searchBar__clear" onClick={() => onChange('')}>✕</button>
+    )}
+  </div>
+);
 
 // Fetches and displays public events. Supports category filtering. Also Re-fetches when reloadTrigger changes.
 const EventFeed = ({ reloadTrigger }) => {
   const [events, setEvents] = useState([]);
   const [category, setCategory] = useState('all');
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -108,23 +122,21 @@ const EventFeed = ({ reloadTrigger }) => {
       setLoading(false);
     };
     fetchEvents();
-  }, [category, reloadTrigger]);
+  }, [category, search, reloadTrigger]);
 
   return (
     <section className="feedSection">
-      <h2 className="sectionTitle">Event Feed</h2>
-      <EventCategoryFilter active={category} onChange={setCategory} />
- 
+      <h2 className="sectionTitle">Archive</h2>
+      <SearchBar value={search} onChange={setSearch} />   {/* ← add */}
+      <CategoryFilter active={category} onChange={setCategory} />
       {loading && <p className="feedEmpty">Loading...</p>}
- 
-      {!loading && events.length === 0 && (
-        <p className="feedEmpty">No events posted yet. Be the first!</p>
+      {!loading && moves.length === 0 && (
+        <p className="feedEmpty">
+          {search ? `No moves found for "${search}".` : 'No moves posted yet. Be the first!'}
+        </p>  
       )}
- 
       <div className="moveGrid">
-        {events.map((event) => (
-          <EventCard key={event._id} event={event} />
-        ))}
+        {moves.map((move) => <MoveCard key={move._id} move={move} />)}
       </div>
     </section>
   );

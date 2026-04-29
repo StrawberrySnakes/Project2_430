@@ -59,6 +59,8 @@ const DanceMoveSchema = new mongoose.Schema({
   },
 });
 
+DanceMoveSchema.index({ title: 'text', description: 'text' });
+
 // Converts to a safe API-facing object (no internal fields exposed)
 DanceMoveSchema.statics.toAPI = (doc) => ({
   title: doc.title,

@@ -803,6 +803,46 @@ nav.appNav {
 
 .notFound p { color: var(--text-muted); }
 
+.searchBar {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.searchBar__input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: 0.7rem 2.5rem 0.7rem 1rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.searchBar__input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(232, 68, 58, 0.12);
+}
+
+.searchBar__input::placeholder { color: var(--text-dim); }
+
+.searchBar__clear {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 0.2rem;
+  transition: color var(--transition);
+}
+
+.searchBar__clear:hover { color: var(--primary); }
+
 /*Responsive*/
 @media (max-width: 640px) {
   nav.authNav,

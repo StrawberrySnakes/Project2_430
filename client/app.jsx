@@ -108,41 +108,56 @@ const MoveCard = ({ move, onDelete }) => {
   );
 };
 
+const SearchBar = ({ value, onChange }) => (
+  <div className="searchBar">
+    <input
+      type="text"
+      className="searchBar__input"
+      placeholder="Search moves by name or description..."
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+    {value && (
+      <button className="searchBar__clear" onClick={() => onChange('')}>✕</button>
+    )}
+  </div>
+);
+
 // Fetches and displays public moves. Supports category filtering.
 const MoveFeed = ({ reloadTrigger }) => {
   const [moves, setMoves] = useState([]);
   const [category, setCategory] = useState('all');
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMoves = async () => {
       setLoading(true);
-      const url = category === 'all'
-        ? '/getPublicMoves'
-        : `/getPublicMoves?category=${category}`;
+      const params = new URLSearchParams();
+      if (category !== 'all') params.set('category', category);
+      if (search.trim()) params.set('search', search.trim());
+      const url = `/getPublicMoves${params.toString() ? `?${params}` : ''}`;
       const response = await fetch(url);
       const data = await response.json();
       setMoves(data.moves || []);
       setLoading(false);
     };
     fetchMoves();
-  }, [category, reloadTrigger]);
+  }, [category, search, reloadTrigger]);// add search
 
   return (
     <section className="feedSection">
       <h2 className="sectionTitle">Archive</h2>
+      <SearchBar value={search} onChange={setSearch} />
       <CategoryFilter active={category} onChange={setCategory} />
-
       {loading && <p className="feedEmpty">Loading...</p>}
-
       {!loading && moves.length === 0 && (
-        <p className="feedEmpty">No moves posted yet. Be the first!</p>
+        <p className="feedEmpty">
+          {search ? `No moves found for "${search}".` : 'No moves posted yet. Be the first!'}
+        </p>
       )}
-
       <div className="moveGrid">
-        {moves.map((move) => (
-          <MoveCard key={move._id} move={move} />
-        ))}
+        {moves.map((move) => <MoveCard key={move._id} move={move} />)}
       </div>
     </section>
   );

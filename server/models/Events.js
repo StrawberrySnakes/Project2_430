@@ -52,6 +52,8 @@ const EventSchema = new mongoose.Schema({
   },
 });
 
+EventSchema.index({ title: 'text', description: 'text' });
+
 // Converts to a safe API-facing object (no internal fields exposed)
 EventSchema.statics.toAPI = (doc) => ({
   title: doc.title,

@@ -37,8 +37,8 @@ const createEvent = async (req, res) => {
     title,
     description,
     category,
-    imageURL: imageUrl || '',
-    mediaURL: resolvedMediaUrl,
+    imageUrl: imageUrl || '',       // ← was imageURL
+    mediaUrl: resolvedMediaUrl,     // ← was mediaURL
     mediaType,
     isPublic: isPublic === true || isPublic === 'true',
     owner: req.session.account._id,
@@ -58,7 +58,7 @@ const createEvent = async (req, res) => {
 const getEvents = async (req, res) => {
   try {
     const docs = await Events.find({ owner: req.session.account._id })
-      .select('title description category imageURL isPublic createdDate')
+      .select('title description category imageUrl mediaUrl mediaType isPublic createdDate')
       .lean()
       .exec();
     return res.json({ events: docs });
@@ -76,11 +76,14 @@ const getPublicEvents = async (req, res) => {
     if (req.query.category && VALID_CATEGORIES.includes(req.query.category)) {
       query.category = req.query.category;
     }
+    if (req.query.search && req.query.search.trim()) {
+      query.$text = { $search: req.query.search.trim() };
+    }
 
     const docs = await Events.find(query)
-      .select('title description category imageURL createdDate owner')
-      .populate('owner', 'username') // attach username to each post
-      .sort({ createdDate: -1 })     // newest first
+      .select('title description category imageUrl mediaUrl mediaType createdDate owner')
+      .populate('owner', 'username')
+      .sort({ createdDate: -1 })
       .lean()
       .exec();
 

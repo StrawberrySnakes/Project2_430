@@ -2,6 +2,8 @@
 
 const controllers = require('./controllers');
 const mid = require('./middleware');
+const { upload, processUpload } = require('./middleware/upload');
+
 
 const router = (app) => {
   app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
@@ -19,7 +21,7 @@ const router = (app) => {
   app.get('/app', mid.requiresLogin, controllers.DanceMove.appPage);
 
   // Dance move routes
-  app.post('/createMove', mid.requiresLogin, controllers.DanceMove.createMove);
+  app.post('/createMove',  mid.requiresLogin, upload.single('media'), processUpload, controllers.DanceMove.createMove);
   app.get('/getMoves', mid.requiresLogin, controllers.DanceMove.getMoves);
   app.get('/getPublicMoves', mid.requiresLogin, controllers.DanceMove.getPublicMoves);
   app.post('/deleteMove', mid.requiresLogin, controllers.DanceMove.deleteMove);
@@ -27,7 +29,7 @@ const router = (app) => {
   // Event routes
   app.get('/events', mid.requiresLogin, controllers.Events.eventPage);
   
-  app.post('/createEvent', mid.requiresLogin, controllers.Events.createEvent);
+  app.post('/createEvent', mid.requiresLogin, upload.single('media'), processUpload, controllers.Events.createEvent);
   app.get('/getEvents', mid.requiresLogin, controllers.Events.getEvents);
   app.get('/getPublicEvents', mid.requiresLogin, controllers.Events.getPublicEvents);
   app.post('/deleteEvent', mid.requiresLogin, controllers.Events.deleteEvent);
