@@ -28,10 +28,9 @@ const createEvent = async (req, res) => {
   let mediaType = 'link';
  
   if (req.file) {
-    resolvedMediaUrl = `/assets/uploads/${req.file.filename}`;
+    resolvedMediaUrl = req.file.path;
     mediaType = req.file.mimetype.startsWith('video') ? 'video' : 'image';
   }
-
 
   const eventData = {
     title,

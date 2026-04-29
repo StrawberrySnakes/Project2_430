@@ -28,8 +28,8 @@ const createMove = async (req, res) => {
   let mediaType = 'link';
  
   if (req.file) {
-    // Files land in hosted/uploads/ which is served at /assets/uploads/
-    resolvedMediaUrl = `/assets/uploads/${req.file.filename}`;
+    // req.file.path is the full Cloudinary URL when using CloudinaryStorage
+    resolvedMediaUrl = req.file.path;
     mediaType = req.file.mimetype.startsWith('video') ? 'video' : 'image';
   }
  

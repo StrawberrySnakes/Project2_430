@@ -33,13 +33,13 @@ redisClient.connect().then(() => {
     const app = express();
 
     app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        'img-src': ["'self'", 'data:', 'blob:'],
-        'media-src': ["'self'", 'blob:'],  // covers video previews too
+        contentSecurityPolicy: {
+            directives: {
+            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+            'img-src':   ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com'],
+            'media-src': ["'self'", 'blob:', 'https://res.cloudinary.com'],
+            },
         },
-    },
     }));
     app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted`)));
     app.use(favicon(`${__dirname}/../hosted/img/favicon.png`));
