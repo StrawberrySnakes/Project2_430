@@ -83,7 +83,7 @@ const getPublicEvents = async (req, res) => {
     const docs = await Events.find(query)
       .select('title description category imageUrl mediaUrl mediaType createdDate owner')
       .populate('owner', 'username')
-      .sort({ createdDate: -1 })
+      .sort(query.$text ? { score: { $meta: 'textScore' } } : { createdDate: -1 })
       .lean()
       .exec();
 

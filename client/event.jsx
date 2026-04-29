@@ -113,9 +113,10 @@ const EventFeed = ({ reloadTrigger }) => {
   useEffect(() => {
     const fetchEvents = async () => {
       setLoading(true);
-      const url = category === 'all'
-        ? '/getPublicEvents'
-        : `/getPublicEvents?category=${category}`;
+      const params = new URLSearchParams();
+      if (category !== 'all') params.set('category', category);
+      if (search.trim()) params.set('search', search.trim());
+      const url = `/getPublicEvents${params.toString() ? `?${params}` : ''}`;
       const response = await fetch(url);
       const data = await response.json();
       setEvents(data.events || []);
@@ -126,17 +127,17 @@ const EventFeed = ({ reloadTrigger }) => {
 
   return (
     <section className="feedSection">
-      <h2 className="sectionTitle">Archive</h2>
-      <SearchBar value={search} onChange={setSearch} />   {/* ← add */}
-      <CategoryFilter active={category} onChange={setCategory} />
+      <h2 className="sectionTitle">Event Feed</h2>
+      <SearchBar value={search} onChange={setSearch} />
+      <EventCategoryFilter active={category} onChange={setCategory} />
       {loading && <p className="feedEmpty">Loading...</p>}
-      {!loading && moves.length === 0 && (
+      {!loading && events.length === 0 && (
         <p className="feedEmpty">
-          {search ? `No moves found for "${search}".` : 'No moves posted yet. Be the first!'}
-        </p>  
+          {search ? `No events found for "${search}".` : 'No events posted yet. Be the first!'}
+        </p>
       )}
       <div className="moveGrid">
-        {moves.map((move) => <MoveCard key={move._id} move={move} />)}
+        {events.map((event) => <EventCard key={event._id} event={event} />)}
       </div>
     </section>
   );

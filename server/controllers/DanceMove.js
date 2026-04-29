@@ -81,12 +81,12 @@ const getPublicMoves = async (req, res) => {
       query.$text = { $search: req.query.search.trim() };
     }
 
-    const docs = await DanceMove.find(query)
-      .select('title description category videoUrl mediaUrl mediaType createdDate owner')
-      .populate('owner', 'username')
-      .sort({ createdDate: -1 })
-      .lean()
-      .exec();
+  const docs = await DanceMove.find(query)
+    .select('title description category videoUrl mediaUrl mediaType createdDate owner')
+    .populate('owner', 'username')
+    .sort(query.$text ? { score: { $meta: 'textScore' } } : { createdDate: -1 })
+    .lean()
+    .exec();
 
     return res.json({ moves: docs });
   } catch (err) {
